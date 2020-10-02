@@ -1,23 +1,26 @@
-from cosmosis.datablock import names, option_section
+from cosmosis.datablock import option_section
 from cosmosis.runtime import register_new_parameter
 from skypy.pipeline import Pipeline
 
+def parameter_expand(lower, start=None, upper=None, *prior):
+    if isinstance(lower, list):
+        return parameter_expand(*lower)
+    elif isinstance(lower, dict):
+        return parameter_expand(**lower)
+    else:
+        return lower, start or lower, upper or start or lower, *prior
+
 def setup(options):
-    module_name = options['pipeline', '_cosmosis_active_module']
+    module_name = options['pipeline', 'current_module']
 
     filename = options.get_string(option_section, 'pipeline')
     pipeline = Pipeline.read(filename)
 
     for parameter_name, parameter_value in pipeline.parameters.items():
-        register_new_parameter(
-            options,
-            module_name,
-            parameter_name,
-            parameter_value,  # min value
-            parameter_value,  # start value
-            parameter_value,  # max value
-            # optional prior could go here
-        )
+        register_new_parameter(options,
+                               module_name,
+                               parameter_name,
+                               *parameter_expand(parameter_value))
 
     results = options.get_string(option_section, 'results')
 

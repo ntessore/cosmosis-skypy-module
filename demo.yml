@@ -1,5 +1,5 @@
 parameters:
-  H0: 70.
+  H0: [50., 70., 100.]
   Om0: 0.3
 cosmology: !astropy.cosmology.FlatLambdaCDM
   H0: $H0
